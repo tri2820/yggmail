@@ -46,7 +46,7 @@ func NewYggdrasilTransport(log *log.Logger, sk ed25519.PrivateKey, pk ed25519.Pu
 		NodeInfoPrivacy: true,
 	}
 	yellow := color.New(color.FgYellow).SprintfFunc()
-	glog := gologme.New(log.Writer(), fmt.Sprintf("[ %s ] ", yellow("Yggdrasil")), gologme.LstdFlags | gologme.Lmsgprefix)
+	glog := gologme.New(log.Writer(), fmt.Sprintf("[ %s ] ", yellow("Yggdrasil")), gologme.LstdFlags|gologme.Lmsgprefix)
 	glog.EnableLevel("warn")
 	glog.EnableLevel("error")
 	glog.EnableLevel("info")
@@ -74,6 +74,7 @@ func NewYggdrasilTransport(log *log.Logger, sk ed25519.PrivateKey, pk ed25519.Pu
 }
 
 func (t *YggdrasilTransport) Dial(host string) (net.Conn, error) {
+	// IWT does all the heavy work
 	addr := make(iwt.Addr, ed25519.PublicKeySize)
 	k, err := hex.DecodeString(host)
 	if err != nil {

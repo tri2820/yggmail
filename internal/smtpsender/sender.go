@@ -123,12 +123,14 @@ func (q *Queue) run() {
 		q.queues.Log.Println("Sending mail from", ref.From, "to", q.destination)
 
 		if err := func() error {
+			// Dial before each message, then close tcp
 			conn, err := q.queues.Transport.Dial(q.destination)
 			if err != nil {
 				return fmt.Errorf("q.queues.Transport.Dial: %w", err)
 			}
 			defer conn.Close()
 
+			// This set the connection
 			client, err := smtp.NewClient(conn, q.destination)
 			if err != nil {
 				return fmt.Errorf("smtp.NewClient: %w", err)
