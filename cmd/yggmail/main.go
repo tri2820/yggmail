@@ -26,6 +26,7 @@ import (
 
 	// "github.com/neilalexander/yggmail/internal/smtpsender"
 	"github.com/fatih/color"
+	"github.com/neilalexander/utp"
 	"github.com/neilalexander/yggmail/internal/transport"
 )
 
@@ -43,18 +44,7 @@ func (i *peerAddrList) Set(value string) error {
 func server(c net.Conn) {
 	fmt.Printf("Serving %s\n", c.RemoteAddr().String())
 
-	err := c.(*net.TCPConn).SetKeepAlive(true)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	err = c.(*net.TCPConn).SetKeepAlivePeriod(5 * time.Second)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
+	// This go routine stops once c is closed
 	for {
 		// Receive
 		netData, err := bufio.NewReader(c).ReadString('\n')
@@ -136,6 +126,12 @@ func main() {
 		// Server
 		l := transport.Listener()
 		defer l.Close()
+
+		l.(*utp.Socket).OnDetach(func(remote net.Addr) {
+			fmt.Printf("this is over %s\n", remote)
+			// Make a go routine inside server read from a channel and close c if the same address.
+		})
+
 		for {
 			c, err := l.Accept()
 			if err != nil {
